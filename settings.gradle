@@ -1,0 +1,3 @@
+rootProject.name='ys-sdk'
+
+include 'demo'
