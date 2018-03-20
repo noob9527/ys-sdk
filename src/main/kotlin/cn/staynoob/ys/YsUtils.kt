@@ -59,9 +59,9 @@ internal fun <T> Call<out YsHttpResponse<T>>.exec(): YsHttpResponse<T> {
     return body
 }
 
-internal fun <T> Call<out YsHttpResponse<T>>.toResult(): T {
-    return this.exec().data!!
-}
+internal fun <T> Call<out YsHttpResponse<T>>.getData(): T? = this.exec().data
+
+internal fun <T> Call<out YsHttpResponse<T>>.getNonNullData(): T = this.getData()!!
 
 internal fun appendParam(
         formBody: FormBody?,

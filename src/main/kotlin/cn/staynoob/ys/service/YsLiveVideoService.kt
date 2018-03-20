@@ -1,9 +1,9 @@
-package cn.staynoob.ys
+package cn.staynoob.ys.service
 
 import cn.staynoob.ys.domain.response.VideoAddress
 
-interface YsService {
-    fun listVideoAddress(
+interface YsLiveVideoService {
+    fun listAddress(
             pageStart: Int = 0,
             pageSize: Int = 20
     ): List<VideoAddress>

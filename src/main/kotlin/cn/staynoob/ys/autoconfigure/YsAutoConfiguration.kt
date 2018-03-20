@@ -1,11 +1,21 @@
 package cn.staynoob.ys.autoconfigure
 
-import cn.staynoob.ys.*
-import cn.staynoob.ys.http.YsApiService
+import cn.staynoob.ys.YsProperties
+import cn.staynoob.ys.YsTokenHolder
+import cn.staynoob.ys.domain.response.YsToken
+import cn.staynoob.ys.http.YsLiveVideoClient
+import cn.staynoob.ys.http.YsPassengerFlowClient
+import cn.staynoob.ys.http.YsTokenClient
 import cn.staynoob.ys.http.YsTokenInterceptor
-import cn.staynoob.ys.http.YsTokenService
+import cn.staynoob.ys.objectMapper
+import cn.staynoob.ys.service.YsLiveVideoService
+import cn.staynoob.ys.service.YsLiveVideoServiceImpl
+import cn.staynoob.ys.service.YsPassengerFlowService
+import cn.staynoob.ys.service.YsPassengerFlowServiceImpl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.boot.autoconfigure.AutoConfigureOrder
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -13,13 +23,18 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
+import java.time.Instant
 
 @Configuration
 @AutoConfigureOrder
 @EnableConfigurationProperties(YsProperties::class)
 class YsAutoConfiguration(
-        private val properties: YsProperties
+        private val properties: YsProperties,
+        private val beanFactory: ConfigurableBeanFactory
 ) {
+
+    @Value("\${ys-test-token:#{null}}")
+    private val accessToken: String? = null
 
     private val loggingInterceptor = HttpLoggingInterceptor()
             .apply {
@@ -31,9 +46,7 @@ class YsAutoConfiguration(
                 JacksonConverterFactory.create(objectMapper)
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    internal fun ysTokenService(): YsTokenService {
+    internal fun ysTokenClient(): YsTokenClient {
         val client = OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)
                 .build()
@@ -42,39 +55,44 @@ class YsAutoConfiguration(
                 .addConverterFactory(jacksonConverterFactory)
                 .client(client)
                 .build()
-        return retrofit.create(YsTokenService::class.java)
+        return retrofit.create(YsTokenClient::class.java)
     }
 
     @Bean
     @ConditionalOnMissingBean
-    internal fun ysTokenHolder(
-            tokenService: YsTokenService
-    ): YsTokenHolder {
-        return YsTokenHolder(properties, tokenService)
+    internal fun ysTokenHolder(): YsTokenHolder {
+        // just for test
+        val token = if (accessToken != null)
+            YsToken(accessToken!!, Instant.now().plusSeconds(3600))
+        else null
+        return YsTokenHolder(properties, ysTokenClient(), token)
     }
 
     @Bean
     @ConditionalOnMissingBean
-    internal fun ysApiService(
-            ysTokenHolder: YsTokenHolder
-    ): YsApiService {
+    internal fun ysRetrofit(
+            tokenHolder: YsTokenHolder
+    ): Retrofit {
         val client = OkHttpClient.Builder()
-                .addInterceptor(YsTokenInterceptor(ysTokenHolder))
+                .addInterceptor(YsTokenInterceptor(tokenHolder))
                 .addInterceptor(loggingInterceptor)
                 .build()
-        val retrofit = Retrofit.Builder()
+        return Retrofit.Builder()
                 .baseUrl(properties.apiUrl)
                 .addConverterFactory(jacksonConverterFactory)
                 .client(client)
                 .build()
-        return retrofit.create(YsApiService::class.java)
     }
 
     @Bean
     @ConditionalOnMissingBean
-    internal fun ysService(
-            ysApiService: YsApiService
-    ): YsService {
-        return YsServiceImpl(ysApiService)
+    internal fun ysLiveVideoService(ysRetrofit: Retrofit): YsLiveVideoService {
+        return YsLiveVideoServiceImpl(ysRetrofit.create(YsLiveVideoClient::class.java))
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    internal fun ysPassengerFlowService(ysRetrofit: Retrofit): YsPassengerFlowService {
+        return YsPassengerFlowServiceImpl(ysRetrofit.create(YsPassengerFlowClient::class.java))
     }
 }

@@ -1,14 +1,14 @@
 package cn.staynoob.ys
 
 import cn.staynoob.ys.domain.response.YsToken
-import cn.staynoob.ys.http.YsTokenService
+import cn.staynoob.ys.http.YsTokenClient
 
 internal class YsTokenHolder(
         private val property: YsProperties,
-        private val tokenService: YsTokenService
+        private val tokenClient: YsTokenClient,
+        private var token: YsToken? = null
 ) {
 
-    private var token: YsToken? = null
 
     /**
      * get a valid token from cache or ys service
@@ -21,11 +21,11 @@ internal class YsTokenHolder(
     fun getAccessToken(): String {
         val token = this.token
         if (token == null || token.isExpired || token.isAboutToExpire) {
-            val newToken = tokenService
+            val newToken = tokenClient
                     .getAccessToken(
                             property.appKey,
                             property.appSecret
-                    ).toResult()
+                    ).getNonNullData()
             this.token = newToken
             return newToken.accessToken
         } else {

@@ -7,11 +7,11 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
-internal interface YsApiService {
+internal interface YsLiveVideoClient {
 
     @POST("live/video/list")
     @FormUrlEncoded
-    fun listVideoAddress(
+    fun listAddress(
             @Field("pageStart") pageStart: Int,
             @Field("pageSize") pageSize: Int
     ): Call<YsHttpResponse<List<VideoAddress>>>

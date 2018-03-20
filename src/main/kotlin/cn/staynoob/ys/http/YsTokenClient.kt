@@ -7,7 +7,7 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
-internal interface YsTokenService {
+internal interface YsTokenClient {
     @POST("token/get")
     @FormUrlEncoded
     fun getAccessToken(
