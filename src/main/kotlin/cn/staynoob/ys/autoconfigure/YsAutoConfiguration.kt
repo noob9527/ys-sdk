@@ -3,15 +3,9 @@ package cn.staynoob.ys.autoconfigure
 import cn.staynoob.ys.YsProperties
 import cn.staynoob.ys.YsTokenHolder
 import cn.staynoob.ys.domain.response.YsToken
-import cn.staynoob.ys.http.YsLiveVideoClient
-import cn.staynoob.ys.http.YsPassengerFlowClient
-import cn.staynoob.ys.http.YsTokenClient
-import cn.staynoob.ys.http.YsTokenInterceptor
+import cn.staynoob.ys.http.*
 import cn.staynoob.ys.objectMapper
-import cn.staynoob.ys.service.YsLiveVideoService
-import cn.staynoob.ys.service.YsLiveVideoServiceImpl
-import cn.staynoob.ys.service.YsPassengerFlowService
-import cn.staynoob.ys.service.YsPassengerFlowServiceImpl
+import cn.staynoob.ys.service.*
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.springframework.beans.factory.annotation.Value
@@ -94,5 +88,11 @@ class YsAutoConfiguration(
     @ConditionalOnMissingBean
     internal fun ysPassengerFlowService(ysRetrofit: Retrofit): YsPassengerFlowService {
         return YsPassengerFlowServiceImpl(ysRetrofit.create(YsPassengerFlowClient::class.java))
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    internal fun ysDeviceService(ysRetrofit: Retrofit): YsDeviceService {
+        return YsDeviceServiceImpl(ysRetrofit.create(YsDeviceClient::class.java))
     }
 }
