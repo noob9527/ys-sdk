@@ -1,11 +1,8 @@
 package cn.staynoob.ys.domain.response
 
-import com.fasterxml.jackson.databind.MapperFeature
+import cn.staynoob.ys.objectMapper
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -15,35 +12,34 @@ import java.time.Instant
 class YsTokenTest {
     private lateinit var mapper: ObjectMapper
 
+    private val expireTime = 1527496245417
+    private val json = """{"accessToken":"accessToken","expireTime":$expireTime}"""
+
     @BeforeEach
     fun setUp() {
-        mapper = ObjectMapper()
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
-                .registerModule(JavaTimeModule())
-                .registerKotlinModule()
+        mapper = objectMapper
     }
 
     @Test
     @DisplayName("serialize test")
     fun test100() {
         val token = YsToken(
-                "account",
-                Instant.now()
+                "accessToken",
+                Instant.ofEpochMilli(expireTime)
         )
-        mapper.writeValueAsString(token)
+        val res = mapper.writeValueAsString(token)
+        assertThat(res).isEqualTo(json)
     }
 
     @Test
     @DisplayName("deserialize test")
     fun test200() {
-        val json = """
-            {
-                "accessToken": "7da3330ec28e3996b6ef4a7123456789",
-                "expireTime": 1470810222045
-            }
-        """
-        mapper.readValue<YsToken>(json)
+        val res = mapper.readValue<YsToken>(json)
+        val expected = YsToken(
+                "accessToken",
+                Instant.ofEpochMilli(expireTime)
+        )
+        assertThat(res).isEqualTo(expected)
     }
 
     @Test

@@ -2,6 +2,7 @@ package cn.staynoob.ys
 
 import cn.staynoob.ys.domain.response.YsToken
 import cn.staynoob.ys.http.YsTokenClient
+import org.apache.log4j.Logger
 
 internal class YsTokenHolder(
         private val property: YsProperties,
@@ -9,6 +10,9 @@ internal class YsTokenHolder(
         private var token: YsToken? = null
 ) {
 
+    companion object {
+        private val log = Logger.getLogger(YsTokenHolder::class.java)
+    }
 
     /**
      * get a valid token from cache or ys service
@@ -20,6 +24,14 @@ internal class YsTokenHolder(
     @Synchronized
     fun getAccessToken(): String {
         val token = this.token
+
+        if (log.isDebugEnabled) {
+            log.debug("current token info:")
+            log.debug("token:" + this.token)
+            log.debug("expireTime:" + this.token?.let { dateFormatter.format(it.expireTime) })
+            log.debug("isExpired:" + this.token?.isExpired)
+            log.debug("isAboutToExpire:" + this.token?.isAboutToExpire)
+        }
         if (token == null || token.isExpired || token.isAboutToExpire) {
             val newToken = tokenClient
                     .getAccessToken(
@@ -27,6 +39,15 @@ internal class YsTokenHolder(
                             property.appSecret
                     ).getNonNullData()
             this.token = newToken
+            if (log.isDebugEnabled) {
+                log.debug("new token info:")
+                log.debug("token:" + this.token)
+                log.debug("expireTime:" + this.token?.let {
+                    dateFormatter.format(it.expireTime)
+                })
+                log.debug("isExpired:" + this.token?.isExpired)
+                log.debug("isAboutToExpire:" + this.token?.isAboutToExpire)
+            }
             return newToken.accessToken
         } else {
             return token.accessToken

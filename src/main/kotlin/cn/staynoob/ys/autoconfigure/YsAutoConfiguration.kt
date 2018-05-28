@@ -40,6 +40,8 @@ class YsAutoConfiguration(
                 JacksonConverterFactory.create(objectMapper)
     }
 
+    @Bean
+    @ConditionalOnMissingBean
     internal fun ysTokenClient(): YsTokenClient {
         val client = OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)

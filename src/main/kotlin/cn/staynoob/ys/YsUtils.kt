@@ -9,17 +9,22 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import okhttp3.FormBody
 import retrofit2.Call
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 internal val objectMapper = ObjectMapper()
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
+        .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
         .registerModule(JavaTimeModule())
         .registerKotlinModule()
 
 internal val dateFormatter = DateTimeFormatter
         .ofPattern("yyyy-MM-dd HH:mm:ss")
+        .withLocale(Locale.getDefault())
+        .withZone(ZoneId.systemDefault())
 
 internal operator fun FormBody.iterator(): Iterator<Pair<String, String>> {
     return object : Iterator<Pair<String, String>> {
