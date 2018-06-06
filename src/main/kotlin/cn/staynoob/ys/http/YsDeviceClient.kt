@@ -8,6 +8,14 @@ import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
 interface YsDeviceClient {
+
+    @POST("device/add")
+    @FormUrlEncoded
+    fun addDevice(
+            @Field("deviceSerial") deviceSerial: String,
+            @Field("validateCode") validateCode: String
+    ): Call<YsHttpResponse<Unit>>
+
     @POST("device/capture")
     @FormUrlEncoded
     fun capture(
