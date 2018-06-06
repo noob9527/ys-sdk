@@ -59,7 +59,7 @@ internal fun <T> Call<out YsHttpResponse<T>>.exec(): YsHttpResponse<T> {
     }
     val body = res.body()!!
     if (body.code != 200) {
-        throw YsApiException(body.msg)
+        throw YsApiException(body.msg, body.code)
     }
     return body
 }

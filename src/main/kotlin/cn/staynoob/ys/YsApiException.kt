@@ -1,5 +1,6 @@
 package cn.staynoob.ys
 
 class YsApiException(
-        message: String
+        message: String,
+        val code: Int? = null
 ) : RuntimeException(message)
