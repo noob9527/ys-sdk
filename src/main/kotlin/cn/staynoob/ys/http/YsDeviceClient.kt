@@ -16,6 +16,13 @@ interface YsDeviceClient {
             @Field("validateCode") validateCode: String
     ): Call<YsHttpResponse<Unit>>
 
+    @POST("device/encrypt/off")
+    @FormUrlEncoded
+    fun turnOffEncrypt(
+            @Field("deviceSerial") deviceSerial: String,
+            @Field("validateCode") validateCode: String
+    ): Call<YsHttpResponse<Unit>>
+
     @POST("device/capture")
     @FormUrlEncoded
     fun capture(

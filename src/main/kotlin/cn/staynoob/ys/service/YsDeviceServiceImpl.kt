@@ -12,6 +12,10 @@ internal class YsDeviceServiceImpl(
         ysDeviceClient.addDevice(deviceSerial, validateCode).exec()
     }
 
+    override fun turnOffEncrypt(deviceSerial: String, validateCode: String) {
+        ysDeviceClient.turnOffEncrypt(deviceSerial, validateCode).exec()
+    }
+
     override fun capture(deviceSerial: String, channelNo: Int): Picture {
         return ysDeviceClient.capture(deviceSerial, channelNo)
                 .getNonNullData()

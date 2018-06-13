@@ -9,6 +9,11 @@ interface YsDeviceService {
             validateCode: String
     )
 
+    fun turnOffEncrypt(
+            deviceSerial: String,
+            validateCode: String
+    )
+
     fun capture(
             deviceSerial: String,
             channelNo: Int = 1
